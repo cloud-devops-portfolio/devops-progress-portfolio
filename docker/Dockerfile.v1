@@ -1,0 +1,14 @@
+# 1. Use the Node.js base image
+FROM node:18
+
+# 2. Set working directory inside the container
+WORKDIR /app
+
+# 3. Copy local app files into the container
+COPY app/ .
+
+# 4. Install dependencies inside the container
+RUN npm install
+
+# 5. Run tests by default when the container starts
+CMD ["npm", "test"]
