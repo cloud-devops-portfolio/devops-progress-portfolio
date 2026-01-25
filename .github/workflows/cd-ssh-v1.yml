@@ -1,0 +1,40 @@
+name: CD v1 - Deploy via SSH
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      # Checkout repository code
+      - uses: actions/checkout@v4
+
+      # Set up SSH agent
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Deploy application on remote server
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+
+          docker pull ghcr.io/${{ github.actor }}/devops-app:latest
+
+          docker stop devops-app || true
+          docker rm devops-app || true
+
+          docker run -d \
+            --name devops-app \
+            ghcr.io/${{ github.actor }}/devops-app:latest
+
+          EOF
